@@ -56,3 +56,14 @@ Rules = [
     }
 ]
 
+# Function check the message match to the given rules and return the response if match found otherwise return None.
+def check_rules(message: str):
+    message = message.lower().strip()
+    for rule in Rules:
+        if re.search(rule["pattern"], message):
+            return rule["response"]
+    return None
+
+
+
+
