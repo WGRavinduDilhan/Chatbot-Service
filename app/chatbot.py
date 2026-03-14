@@ -3,13 +3,14 @@
 
 import os
 import re
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # Try to import Gemini AI library, if not available, set a flag and print a warning message. This allows the chatbot to function without Gemini AI features while informing the user about the missing dependency.
 try:   
     import google.generativeai as genai
     GEMINI_AVAILABLE = True
 except ImportError:            # If the library is not found, set the flag to False and print a warning message to inform the user about the missing dependency and how to install it.
+    genai = None  # Ensure genai is always defined to avoid "possibly unbound" errors
     GEMINI_AVAILABLE = False
     print("Gemini AI library not found. Please install google-generativeai to use Gemini AI features. use 'pip install google-generativeai' to install.")
 
@@ -56,13 +57,86 @@ Rules = [
     }
 ]
 
-# Function check the message match to the given rules and return the response if match found otherwise return None.
+# This function checks if the user's message matches any of the predefined rules and returns the corresponding response.
+#Check if message matches any rule and return the response if found, otherwise return None.
 def check_rules(message: str):
+    
     message = message.lower().strip()
     for rule in Rules:
         if re.search(rule["pattern"], message):
             return rule["response"]
     return None
+
+
+#Send message to Google Gemini and get a response.
+def get_gemini_response(message: str, history: List[Dict]) -> str:
+    
+    api_key = os.getenv("GEMINI_API_KEY")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
+    if not api_key:
+        return (
+            "⚠️ GEMINI_API_KEY not set in your .env file!\n"
+            "Get your free key at: https://aistudio.google.com\n"
+            "Then add to .env: GEMINI_API_KEY=AIzaSy..."
+        )
+
+    if not GEMINI_AVAILABLE:
+        return "⚠️ google-genai package not installed. Run: pip install google-genai"
+
+    if not genai:
+        return "⚠️ google-generativeai library not available. Please install it first."
+    
+    try:
+        # Step 1: Configure the Gemini API with your API key
+        genai.configure(api_key=api_key)
+
+        # Step 2: Create the model instance
+        model = genai.GenerativeModel(
+            model_name=model_name,
+            system_instruction=(
+                "You are a helpful, friendly, and concise AI assistant. "
+                "Keep responses clear and under 150 words unless the user asks for detail. "
+                "Use emojis occasionally to be friendly. "
+                "If you don't know something, say so honestly."
+            )
+        )
+
+        # Step 3: Build conversation history for chat
+        chat_history = []
+        for msg in history[-10:]:  # Last 10 messages (keeps cost/tokens low)
+            chat_history.append({
+                "role": msg["role"],
+                "parts": msg["content"]
+            })
+
+        # Step 4: Start a chat session and send the message
+        chat = model.start_chat(history=chat_history)
+        response = chat.send_message(
+            message,
+            generation_config={
+                "max_output_tokens": 300,
+                "temperature": 0.7,
+            }
+        )
+
+        # Step 5: Return the response text
+        return response.text
+
+
+    except Exception as e:
+        # Always handle errors gracefully!
+        error_msg = str(e)
+
+        # Give helpful hints for common errors
+        if "API_KEY_INVALID" in error_msg or "invalid" in error_msg.lower():
+            return "❌ Invalid Gemini API key. Check your GEMINI_API_KEY in .env"
+        elif "quota" in error_msg.lower() or "429" in error_msg:
+            return "⏳ Rate limit hit. Free tier allows 15 requests/minute. Try again in a moment!"
+        elif "SAFETY" in error_msg:
+            return "🔒 That message was blocked by Gemini's safety filters. Please rephrase."
+        else:
+            return f"❌ Gemini API error: {error_msg}. Please try again."
 
 
 
