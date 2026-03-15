@@ -139,5 +139,18 @@ def get_gemini_response(message: str, history: List[Dict]) -> str:
             return f"❌ Gemini API error: {error_msg}. Please try again."
 
 
+# Main entry point to call main.py to process user input and generate response.
+
+def get_chatbot_response(message: str, history: List[Dict]) -> str:
+    # First, check if the message matches any predefined rules
+    # Role based response creation 
+    rule_response = check_rules(message)
+    if rule_response:
+        return rule_response
+
+    # If no any rules matched, get a response from Gemini AI
+    gemini_response = get_gemini_response(message, history)
+    return gemini_response
+
 
 
