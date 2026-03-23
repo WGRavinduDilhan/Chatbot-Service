@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot Pro : Powered by Gemini</title>
     <link rel="stylesheet" href="styles.css">
+
 </head>
 
 <body>
@@ -45,81 +46,8 @@
 
     </div>
 
-    <script>
-
-        // Session management using sessionStorage
-        let sessionId = sessionStorage.getItem('sessionId');
-        if (!sessionId) {
-            sessionId = 'user-' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem('sessionId', sessionId);
-        }
-
-        // Send suggestion from button click
-        function sendSuggestion(suggestion) {
-            const userInput = document.getElementById('user-input');
-            userInput.value = suggestion;
-            sendMessage();
-        }
-
-        // Send message function
-        function sendMessage() {
-            const userInput = document.getElementById('user-input');
-            const message = userInput.value.trim();
-            if (message) {
-                const messageArea = document.getElementById('message-area');
-                const userMsg = document.createElement('div');
-                userMsg.className = 'msg user';
-                userMsg.innerHTML = '<div class="avatar">👤</div><div class="bubble">' + escapeHtml(message) + '</div>';
-                messageArea.appendChild(userMsg);
-                userInput.value = '';
-                messageArea.scrollTop = messageArea.scrollHeight;
-                sendToBackend(message);
-            }
-        }
-
-        // Send to backend API
-        async function sendToBackend(message) {
-            try {
-                const response = await fetch('/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, sessionId: sessionId })
-                });
-                const data = await response.json();
-                displayBotResponse(data.response);
-            } catch (error) {
-                console.error('Error:', error);
-                displayBotResponse('Sorry, an error occurred. Please try again.');
-            }
-        }
-
-        // Display bot response
-        function displayBotResponse(response) {
-            const messageArea = document.getElementById('message-area');
-            const botMsg = document.createElement('div');
-            botMsg.className = 'msg bot';
-            botMsg.innerHTML = '<div class="avatar">👽</div><div class="bubble">' + escapeHtml(response) + '</div>';
-            messageArea.appendChild(botMsg);
-            messageArea.scrollTop = messageArea.scrollHeight;
-        }
-
-        // Escape HTML to prevent XSS
-        function escapeHtml(text) {
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-            return text.replace(/[&<>"']/g, m => map[m]);
-        }
-
-        // Event listeners
-        document.getElementById('send-btn').addEventListener('click', sendMessage);
-        document.getElementById('user-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-        });
-        document.getElementById('clear-btn').addEventListener('click', () => {
-            document.getElementById('message-area').innerHTML = '<div class="msg bot"><div class="avatar">👽</div><div class="bubble">Hello! 🫶🧠 I\'m powered by <strong>Gemini 2.0 Flash</strong> (free version)! Ask me anything! I can remember everything you tell me.</div></div>';
-            document.getElementById('user-input').value = '';
-        });
-
-    </script>
+    <!-- Script loaded at the END of body, AFTER all HTML elements are created -->
+    <script src="script.js"></script>
 
 </body>
 </html>
