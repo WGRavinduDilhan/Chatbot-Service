@@ -6,6 +6,9 @@
 .nox/
 .cache/
 pip-wheel-metadata/
+.pycache/
+__pycache__/
+
 
 # Coverage outputs
 .coverage
@@ -30,4 +33,7 @@ ENV/
 # Editor/OS
 .vscode/
 Thumbs.db
+
+# Error fixed readme file
+ERRORS_AND_FIXES.md
 
