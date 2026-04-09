@@ -1,0 +1,29 @@
+# Docker Compose file for the Chatbot Service
+# This file defines the services required to run the Chatbot API, including the API itself and its dependencies.
+# The Chatbot API is built from the Dockerfile in the current directory and relies on a Redis service for caching and session management.
+# Environment variables are used to configure the API, including the Gemini API key, model, and logging level.
+# The Redis service is configured to be healthy before the Chatbot API starts, ensuring that all dependencies are available.
+
+version: '3.9'
+
+services:
+  chatbot-service:
+    build:
+    container_name: chatbot-api
+    restart: unless-stopped
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
+      - REDIS_URL=radis://redis:6379
+      - APP_ENV=${LOG_LEVEL:-INFO}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    depends_on:
+      redis:
+        condition:service_healthy
+    networks:
+      - chatbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3      
