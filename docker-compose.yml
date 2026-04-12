@@ -7,6 +7,9 @@
 version: '3.9'
 
 services:
+
+# Chatbot API Service
+
   chatbot-service:
     build:
     container_name: chatbot-api
@@ -27,3 +30,51 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3      
+
+
+
+    # Redis ( chat history, session management, caching )
+
+    redis:
+      image: redis:7-alpine
+      container_name: chatbot-redis
+      restart: unless-stopped
+      volumes:
+        - redis-data:/data
+      networks:
+        - chatbot-network
+      healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+
+
+     # Networks nginx ( reverse proxy )    
+
+    nginx:
+      image: nginx:alpine
+      container_name: chatbot-nginx
+      restart: unless-stopped
+      ports:
+        - "80:80"
+      volumes:
+        - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+        - ./frontend:/usr/share/nginx/html:ro
+      depends_on:
+        chatbot-service:
+          condition:service_healthy
+      networks:
+        - chatbot-network
+
+  networks:
+    chatbot-network:
+      driver: bridge  
+
+  volumes:
+    redis-data:
+      driver: local    
+
+
+
+
