@@ -4,14 +4,18 @@
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from typing import List
+import os
 
 from app.chatbot import get_chatbot_response
 from app.memory import ChatMemory
 
-# Initialize chat memory and FastAPI app
+# Initialize chat memory with Redis and FastAPI app
+redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+Chat_memory = ChatMemory(redis_url=redis_url, max_sessions=100, max_messages_per_session=50)
+
 app = FastAPI(
     title = "RADI - Responsive AI Assistant",
     description = "RADI is a responsive AI assistant powered by Google Gemini via API.",
@@ -27,20 +31,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-Chat_memory = ChatMemory(max_sessions=100, max_messages_per_session=50)
-
 # Predefined rules for specific user inputs and their corresponding responses.
 class MessageRequest(BaseModel):
     session_id: str
     message: str
 
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "session_id": "user123",
-                "message": "Hello, how are you?"
-            }
+    model_config = ConfigDict(json_schema_extra={
+        "example": {
+            "session_id": "user123",
+            "message": "Hello, how are you?"
         }
+    })
 
 # Predefined rules for specific user inputs and their corresponding responses.
 class MessageResponse(BaseModel):
@@ -69,6 +70,15 @@ async def health_check():
         status="success",
         message="Service is healthy."
     )
+
+@app.get("/status") # Endpoint to check Redis connection and memory status
+async def get_status():
+    status = Chat_memory.get_status()
+    return {
+        "service": "RADI Chatbot API",
+        "version": "2.0.0",
+        "memory": status
+    }
 
 @app.post("/chat", response_model=MessageResponse) # Main endpoint to handle user messages, generate responses using the chatbot logic, and manage conversation history.
 async def chat(request: MessageRequest):
