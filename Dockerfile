@@ -8,7 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
-    -- no-install-recommends && \
+    --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # Install uvicorn and gunicorn for running the FastAPI app
@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
     
 # Run the FastAPI app using uvicorn with multiple workers for better performance
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]

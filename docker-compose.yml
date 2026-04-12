@@ -4,8 +4,6 @@
 # Environment variables are used to configure the API, including the Gemini API key, model, and logging level.
 # The Redis service is configured to be healthy before the Chatbot API starts, ensuring that all dependencies are available.
 
-version: '3.9'
-
 services:
 
   # Chatbot API Service
