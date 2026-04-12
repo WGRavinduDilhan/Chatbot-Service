@@ -17,12 +17,12 @@ services:
     environment:
       - GEMINI_API_KEY=${GEMINI_API}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
-      - REDIS_URL=radis://redis:6379
+      - REDIS_URL=redis://redis:6379
       - APP_ENV=${LOG_LEVEL:-INFO}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     depends_on:
       redis:
-        condition:service_healthy
+        condition: service_healthy
     networks:
       - chatbot-network
     healthcheck:
