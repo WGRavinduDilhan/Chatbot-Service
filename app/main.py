@@ -97,7 +97,6 @@ async def chat(request: MessageRequest):
         bot_response=bot_reply,
         timestamp=datetime.now().isoformat(),
         message_count=Chat_memory.get_count(request.session_id)
-
     )
 
 @app.get("/history/{session_id}") # Endpoint to retrieve the conversation history for a specific session, allowing users to see past interactions with the chatbot.

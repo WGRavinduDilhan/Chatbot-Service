@@ -9,9 +9,9 @@ if (!sessionId) {
 
 console.log('🤖 Chatbot initialized with Session ID:', sessionId);
 
-const API_URL = window.location.hostname === 'localhost'
-    ? 'http://localhost:8000' // Use the backend URL for local development
-    : '/api'; // Use /api path for production (nginx reverse proxy)
+const API_URL = window.location.port === '8000' 
+    ? 'http://localhost:8000' // Direct API access (for local development on port 8000)
+    : '/api'; // Use /api path for nginx reverse proxy (production or localhost:80)
 
 console.log('📡 API URL:', API_URL);
 
