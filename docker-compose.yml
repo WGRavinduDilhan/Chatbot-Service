@@ -11,11 +11,11 @@ services:
 # Chatbot API Service
 
   chatbot-service:
-    build:
+    build: .
     container_name: chatbot-api
     restart: unless-stopped
     environment:
-      - GEMINI_API_KEY=${GEMINI_API}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.0-flash}
       - REDIS_URL=redis://redis:6379
       - APP_ENV=${LOG_LEVEL:-INFO}
