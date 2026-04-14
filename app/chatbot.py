@@ -54,6 +54,26 @@ Rules = [
     {
         "pattern": r"\b(gemini|google ai|google gemini)\b",
         "response": "Yes, I'm powered by Google Gemini! It's Google's AI model — free to use via API. No credit card needed! 🎉"
+    },
+    {
+        "pattern": r"\b(swot|swot analysis|strengths|weaknesses|opportunities|threats)\b",
+        "response": "SWOT Analysis consists of:\n✅ **Strengths** - Internal positive factors\n⚠️ **Weaknesses** - Internal challenges\n🚀 **Opportunities** - External positive factors\n⛔ **Threats** - External risks\nIt's used for strategic planning!"
+    },
+    {
+        "pattern": r"\b(docker|containers|container|containerization)\b",
+        "response": "🐳 **Docker** in simple terms:\nDocker packages your app + all dependencies into a 'container' - like a shipping box that works the same everywhere! You can run it on any computer without worrying about differences. It's lightweight and efficient!"
+    },
+    {
+        "pattern": r"\b(fun fact|random fact|tell me a fact|interesting fact)\b",
+        "response": "🤓 **Fun Fact**: Honey never spoils! Archaeologists found 3,000-year-old honey in Egyptian tombs that was still perfectly edible. Honey has such low moisture and high acidity that bacteria can't grow in it!"
+    },
+    {
+        "pattern": r"\b(who are you|what are you|about yourself|tell me about yourself)\b",
+        "response": "👋 I'm **RADI** (Responsive AI Assistant)! I'm an AI chatbot powered by Google Gemini. I can answer questions, have conversations, and help with various tasks. I have predefined answers for common questions and use AI for complex topics!"
+    },
+    {
+        "pattern": r"\b(time|date|what time|what's the time)\b",
+        "response": "⏰ I can't tell the current time or date, but you can check your system clock or search 'current time' online!"
     }
 ]
 

@@ -1,28 +1,24 @@
-# This is the main chatbot logic file. 
-# It defines the rules for handling specific user inputs and integrates with Google Gemini for generating responses when no rules match. 
-# It also includes error handling for API issues and missing configurations.
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from datetime import datetime
-from typing import List
 import os
 
 from app.chatbot import get_chatbot_response
 from app.memory import ChatMemory
 
-# Initialize chat memory with Redis and FastAPI app
+# Initialize chat memory with Redis
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 Chat_memory = ChatMemory(redis_url=redis_url, max_sessions=100, max_messages_per_session=50)
 
+# Create FastAPI app
 app = FastAPI(
-    title = "RADI - Responsive AI Assistant",
-    description = "RADI is a responsive AI assistant powered by Google Gemini via API.",
-    version = "2.0.0"
+    title="RADI - Responsive AI Assistant",
+    description="AI chatbot powered by Google Gemini",
+    version="2.0.0"
 )
 
-# CORS middleware to allow cross-origin requests from any domain (for frontend integration)
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,19 +27,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Predefined rules for specific user inputs and their corresponding responses.
+# ============ Pydantic Models ============
 class MessageRequest(BaseModel):
     session_id: str
     message: str
 
-    model_config = ConfigDict(json_schema_extra={
-        "example": {
-            "session_id": "user123",
-            "message": "Hello, how are you?"
-        }
-    })
-
-# Predefined rules for specific user inputs and their corresponding responses.
 class MessageResponse(BaseModel):
     session_id: str
     user_message: str
@@ -51,47 +39,41 @@ class MessageResponse(BaseModel):
     timestamp: str
     message_count: int
 
-# Predefined rules for specific user inputs and their corresponding responses.
-class HelloRequest(BaseModel):
+class StatusResponse(BaseModel):
     status: str
     message: str
 
-@app.get("/hello", response_model=HelloRequest) # Simple endpoint to check if the service is running and to provide basic information about the chatbot.
-async def root():
-    return HelloRequest(
+# ============ Endpoints ============
+
+@app.get("/hello", response_model=StatusResponse)
+async def hello():
+    """Check if the service is running"""
+    return StatusResponse(
         status="success", 
-        message="Hello, I'm RADI! Powered by Google Gemini (free). Visit /docs for more information."
-        )
+        message="Hello, I'm RADI! Powered by Google Gemini (free)."
+    )
 
-
-@app.get("/health", response_model=HelloRequest) # Health check endpoint to verify that the service is operational and can be used for monitoring or load balancer health checks.
-async def health_check():
-    return HelloRequest(
+@app.get("/health", response_model=StatusResponse)
+async def health():
+    """Health check endpoint"""
+    return StatusResponse(
         status="success",
         message="Service is healthy."
     )
 
-@app.get("/status") # Endpoint to check Redis connection and memory status
-async def get_status():
-    status = Chat_memory.get_status()
-    return {
-        "service": "RADI Chatbot API",
-        "version": "2.0.0",
-        "memory": status
-    }
-
-@app.post("/chat", response_model=MessageResponse) # Main endpoint to handle user messages, generate responses using the chatbot logic, and manage conversation history.
+@app.post("/chat", response_model=MessageResponse)
 async def chat(request: MessageRequest):
+    """Send a message to the chatbot and get a response"""
     if not request.message.strip():
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     
-    history = Chat_memory.get_history(request.session_id) # Retrieve conversation history for the session to provide context for the chatbot's response.
-    bot_reply = get_chatbot_response(request.message, history) # This function generates a response from the chatbot based on the user's message and the conversation history. it will check predefined rules first and then call Google Gemini if no rules match.
+    history = Chat_memory.get_history(request.session_id)
+    bot_reply = get_chatbot_response(request.message, history)
 
-    Chat_memory.add_message(request.session_id, role="user", content=request.message) # Add the user's message to the conversation history.
-    Chat_memory.add_message(request.session_id, role="bot", content=bot_reply) # Add the chatbot's response to the conversation history.
+    Chat_memory.add_message(request.session_id, role="user", content=request.message)
+    Chat_memory.add_message(request.session_id, role="bot", content=bot_reply)
 
-    return MessageResponse( # Return the chatbot's response along with session information and message count for the frontend to display and manage the conversation.
+    return MessageResponse(
         session_id=request.session_id,
         user_message=request.message,
         bot_response=bot_reply,
@@ -99,23 +81,42 @@ async def chat(request: MessageRequest):
         message_count=Chat_memory.get_count(request.session_id)
     )
 
-@app.get("/history/{session_id}") # Endpoint to retrieve the conversation history for a specific session, allowing users to see past interactions with the chatbot.
-async def get_history(session_id: str):  
+@app.get("/status")
+async def status():
+    """Check system status and Redis connection"""
+    status = Chat_memory.get_status()
+    return {
+        "service": "RADI Chatbot API",
+        "version": "2.0.0",
+        "memory": status
+    }
+
+@app.get("/history/{session_id}")
+async def get_history(session_id: str):
+    """Get conversation history for a session"""
     history = Chat_memory.get_history(session_id)
     if not history:
         raise HTTPException(status_code=404, detail="Session not found.")
-    return {"session_id": session_id, "messages": history, "total_messages": len(history)}
+    return {
+        "session_id": session_id,
+        "messages": history,
+        "total_messages": len(history)
+    }
 
-
-@app.delete("/history/{session_id}") # Endpoint to clear the conversation history for a specific session.
+@app.delete("/history/{session_id}")
 async def clear_history(session_id: str):
+    """Clear conversation history for a session"""
     Chat_memory.clear_history(session_id)
-    return {"session_id": session_id, "message": "History cleared successfully."}
+    return {
+        "session_id": session_id,
+        "message": "History cleared successfully."
+    }
 
-
-@app.get("/sessions") # Endpoint to retrieve a list of all active sessions and the total number of sessions.
+@app.get("/sessions")
 async def get_sessions():
-    return{
-        "active_sessions": Chat_memory.get_all_sessions(),
-        "total_sessions": len(Chat_memory.get_all_sessions())
+    """Get all active sessions"""
+    sessions = Chat_memory.get_all_sessions()
+    return {
+        "active_sessions": sessions,
+        "total_sessions": len(sessions)
     }
