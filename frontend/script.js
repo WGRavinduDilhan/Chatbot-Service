@@ -15,6 +15,11 @@ const API_URL = window.location.port === '8000'
 
 console.log('📡 API URL:', API_URL);
 
+// ⏱️ Rate Limiting - Google Gemini Free Tier: 15 requests/minute
+// Using 5 seconds = 12 requests/minute (safer than 15 to avoid hitting limit)
+const RATE_LIMIT_MS = 5000; // 5 seconds between messages to be safe
+let lastMessageTime = 0;
+
 // Wait for DOM to be ready before accessing elements
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM Content Loaded - Setting up event listeners');
@@ -112,6 +117,8 @@ function hideTyping() {
 // Main send message function
 async function sendMessage() {
     const inputField = document.getElementById('user-input');
+    const btn = document.getElementById("send-btn");
+    
     if (!inputField) {
         console.error('❌ ERROR: Could not find input field');
         return;
@@ -120,14 +127,29 @@ async function sendMessage() {
     const text = inputField.value.trim();
     if (!text) return;
 
+    // ⏱️ Rate Limiting Check - Prevent sending if less than 4 seconds have passed
+    const now = Date.now();
+    const timeSinceLastMessage = now - lastMessageTime;
+    
+    if (lastMessageTime > 0 && timeSinceLastMessage < RATE_LIMIT_MS) {
+        const waitTime = Math.ceil((RATE_LIMIT_MS - timeSinceLastMessage) / 1000);
+        addMessage(`⏳ RATE LIMIT: Please wait ${waitTime} second${waitTime > 1 ? 's' : ''} (Google Gemini allows only 15 requests/minute)`, "bot");
+        console.log(`⏱️ Rate limit enforced: Wait ${waitTime}s before next message. Time since last: ${timeSinceLastMessage}ms`);
+        if (btn) btn.disabled = true;
+        setTimeout(() => { if (btn) btn.disabled = false; }, waitTime * 1000);
+        return;
+    }
+
     console.log('📤 Sending message:', text);
     addMessage(text, "user");
     inputField.value = ""; 
     inputField.style.height = "auto";
     
-    const btn = document.getElementById("send-btn");
     if (btn) btn.disabled = true;
-    showTyping(); 
+    showTyping();
+    
+    // Update timestamp for this message
+    lastMessageTime = Date.now(); 
 
     try {
         console.log('📡 Posting to:', API_URL + '/chat');
@@ -157,8 +179,11 @@ async function sendMessage() {
         hideTyping();
         addMessage(" 💔 Error: " + error.message + "\n\nMake sure:\n1. Backend API is running on port 8000\n2. GEMINI_API_KEY is set in .env file", "bot");
     } finally {
-        if (btn) btn.disabled = false;
-        if (inputField) inputField.focus();
+        // Enable button after cooldown and focus input
+        setTimeout(() => {
+            if (btn) btn.disabled = false;
+            if (inputField) inputField.focus();
+        }, RATE_LIMIT_MS);
     }
 }
 
