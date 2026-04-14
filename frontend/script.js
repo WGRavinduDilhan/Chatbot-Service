@@ -16,8 +16,8 @@ const API_URL = window.location.port === '8000'
 console.log('📡 API URL:', API_URL);
 
 // ⏱️ Rate Limiting - Google Gemini Free Tier: 15 requests/minute
-// Using 5 seconds = 12 requests/minute (safer than 15 to avoid hitting limit)
-const RATE_LIMIT_MS = 5000; // 5 seconds between messages to be safe
+// Using 6 seconds = 10 requests/minute (much safer than 15 to avoid hitting limit)
+const RATE_LIMIT_MS = 6000; // 6 seconds between messages to be safe
 let lastMessageTime = 0;
 
 // Wait for DOM to be ready before accessing elements
