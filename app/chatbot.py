@@ -92,7 +92,7 @@ def check_rules(message: str):
 def get_gemini_response(message: str, history: List[Dict]) -> str:
     
     api_key = os.getenv("GEMINI_API_KEY")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     if not api_key:
         return (
@@ -126,7 +126,7 @@ def get_gemini_response(message: str, history: List[Dict]) -> str:
         chat_history = []
         for msg in history[-10:]:  # Last 10 messages (keeps cost/tokens low)
             chat_history.append({
-                "role": msg["role"],
+                "role": "model" if msg["role"] == "bot" else "user",
                 "parts": msg["content"]
             })
 
