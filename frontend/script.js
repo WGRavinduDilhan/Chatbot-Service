@@ -71,7 +71,7 @@ function addMessage(text, role) {
     const div = document.createElement("div"); // Create a new div element for the message
     div.className = "msg " + role; // Set the class name based on the sender (user or bot)
     
-    const avatar = role === "user" ? "👤" : "🤖";
+    const avatar = role === "user" ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
     div.innerHTML = `<div class="avatar">
     ${avatar}</div>
     <div class="bubble">${escapeHtml(text)}</div>`; // Set the HTML with avatar and message
@@ -96,9 +96,9 @@ function showTyping() {
     div.id = "typing-indicator"; // Set ID to target it later
     div.className = "msg bot typing"; // Set the class name for the typing indicator
     div.innerHTML = `
-    <div class="avatar">🤖</div>
-    <div class="bubble">
-    <span>Typing...</span>
+    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+    <div class="bubble typing-dots">
+        <span></span><span></span><span></span>
     </div>`;
     
     messageArea.appendChild(div); // Append the typing indicator to the message area
@@ -205,7 +205,7 @@ async function clearHistory() {
     const messageArea = document.getElementById("message-area"); // Get the message area
     messageArea.innerHTML = `
         <div class="msg bot">
-            <div class="avatar">🤖</div>
+            <div class="avatar"><i class="fa-solid fa-robot"></i></div>
             <div class="bubble">Chat history cleared! 🧹 Let's start fresh!</div>
         </div>
     `;
