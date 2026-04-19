@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatBot Pro : Powered by Gemini</title>
+    <title>RADI Chat Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-
 </head>
 
 <body>
@@ -14,32 +15,30 @@
         <div class="header">
             <div class="header-icon">👽</div> 
             <div class="header-title">
-                <h1>ChatBot  RADI</h1>
+                <h1>RADI Assistant</h1>
                 <p>Powered by Gemini 2.5 Flash</p>
             </div>
-            <span class="badge free">Free Plan</span>
+            <span class="badge free"><i class="fa-solid fa-bolt"></i> Fast</span>
         </div>
 
         <div id="message-area">
-            <!-- Messages will be dynamically added here -->
-            <div class="msg bot">
-                <div class="avatar">👽</div>
-                <div class="bubble">Hello! 🫶🧠 I'm powered by <strong>Gemini 2.5 Flash</strong> (free version)!
-                Ask me anything! i can remember everything you tell me.</div>
+            <div class="msg bot slide-in">
+                <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="bubble">Hello! 👋 I'm your AI assistant powered by <strong>Gemini 2.5 Flash</strong>. Ask me anything!</div>
             </div>
         </div>
 
         <div class="suggestions">
-            <button class="suggestion-btn" onclick="sendSuggestion('Tell me a joke')">Tell me a joke 👅</button>
-            <button class="suggestion-btn" onclick="sendSuggestion('What is the weather today?')">What is the weather today? 🌤️</button>
-            <button class="suggestion-btn" onclick="sendSuggestion('Give me a fun fact')">Give me a fun fact! 😆</button>
-            <button class="suggestion-btn" onclick="sendSuggestion('Explain Docker in simple terms')">🐳 Explain Docker</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Tell me a joke')"><i class="fa-regular fa-face-smile-wink"></i> Tell me a joke</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('What is the weather today?')"><i class="fa-solid fa-cloud-sun"></i> Weather info</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Give me a fun fact')"><i class="fa-solid fa-lightbulb"></i> Fun fact</button>
+            <button class="suggestion-btn" onclick="sendSuggestion('Explain Docker in simple terms')"><i class="fa-brands fa-docker"></i> Explain Docker</button>
         </div>
 
         <div class="input-bar">
-            <textarea id="user-input" placeholder="Type your message here..." rows="1"></textarea>
-            <button id="send-btn">❇️</button>
-            <button id="clear-btn">Clear ❌</button>
+            <textarea id="user-input" placeholder="Message RADI..." rows="1"></textarea>
+            <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+            <button id="clear-btn"><i class="fa-solid fa-trash-can"></i></button>
         </div>
 
         <div class="footer-note"> Powered by Google Gemini (Free Tier) · FastAPI </div>
