@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RADI Chat Assistant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>RADI | AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div class="container">
+    <main class="container">
 
         <div class="header">
-            <div class="header-icon">👽</div> 
+            <div class="header-icon" aria-hidden="true">👽</div>
             <div class="header-title">
+                <div class="eyebrow"><span class="status-dot"></span> PERSONAL AI WORKSPACE</div>
                 <h1>RADI Assistant</h1>
-                <p>Powered by Gemini 2.5 Flash</p>
+                <p>Powered by gemini-3.5-flash-lite <span class="separator">/</span> Ready to help</p>
             </div>
             <span class="badge free"><i class="fa-solid fa-bolt"></i> Fast</span>
         </div>
@@ -24,7 +25,7 @@
         <div id="message-area">
             <div class="msg bot slide-in">
                 <div class="avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="bubble">Hello! 👋 I'm your AI assistant powered by <strong>Gemini 2.5 Flash</strong>. Ask me anything!</div>
+                <div class="bubble">Hello! 👋 I'm your AI assistant powered by <strong>gemini-3.5-flash-lite</strong>. Ask me anything!</div>
             </div>
         </div>
 
@@ -36,14 +37,17 @@
         </div>
 
         <div class="input-bar">
-            <textarea id="user-input" placeholder="Message RADI..." rows="1"></textarea>
-            <button id="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
-            <button id="clear-btn"><i class="fa-solid fa-trash-can"></i></button>
+            <div class="input-wrap">
+                <textarea id="user-input" placeholder="Message RADI..." rows="1" aria-label="Message RADI"></textarea>
+                <span class="input-hint">Enter to send <span>/</span> Shift + Enter for a new line</span>
+            </div>
+            <button id="send-btn" aria-label="Send message" title="Send message"><i class="fa-solid fa-arrow-up"></i></button>
+            <button id="clear-btn" aria-label="Clear conversation" title="Clear conversation"><i class="fa-solid fa-trash-can"></i></button>
         </div>
 
-        <div class="footer-note"> Powered by Google Gemini (Free Tier) · FastAPI </div>
+        <div class="footer-note"><span>RADI</span> uses Google Gemini <i class="fa-solid fa-circle"></i> FastAPI</div>
 
-    </div>
+    </main>
 
     <!-- Script loaded at the END of body, AFTER all HTML elements are created -->
     <script src="script.js"></script>
