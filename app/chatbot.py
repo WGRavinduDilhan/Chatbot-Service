@@ -92,7 +92,17 @@ def check_rules(message: str):
 def get_gemini_response(message: str, history: List[Dict]) -> str:
     
     api_key = os.getenv("GEMINI_API_KEY")
-    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    default_model = "gemini-3.8-flash"
+    model_name = os.getenv("GEMINI_MODEL", default_model)
+
+    # Older deployments may still have the retired model in their environment.
+    if model_name in {
+        "gemini-2.0-flash",
+        "models/gemini-2.0-flash",
+        "gemini-2.5-flash",
+        "models/gemini-2.5-flash",
+    }:
+        model_name = default_model
 
     if not api_key:
         return (
@@ -171,6 +181,4 @@ def get_chatbot_response(message: str, history: List[Dict]) -> str:
     # If no any rules matched, get a response from Gemini AI
     gemini_response = get_gemini_response(message, history)
     return gemini_response
-
-
 
