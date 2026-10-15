@@ -72,13 +72,21 @@ function addMessage(text, role) {
     div.className = "msg " + role; // Set the class name based on the sender (user or bot)
     
     const avatar = role === "user" ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
+    const renderedText = role === "bot" ? renderBotText(text) : escapeHtml(text);
     div.innerHTML = `<div class="avatar">
     ${avatar}</div>
-    <div class="bubble">${escapeHtml(text)}</div>`; // Set the HTML with avatar and message
+    <div class="bubble">${renderedText}</div>`; // Set the HTML with avatar and message
     
     messageArea.appendChild(div); // Append the message to the message area
     messageArea.scrollTop = messageArea.scrollHeight; // Scroll to the bottom
     return div;
+}
+
+// Render the small Markdown subset used by Gemini after escaping user content.
+function renderBotText(text) {
+    return escapeHtml(text)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
 }
 
 
