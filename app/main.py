@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
+from starlette.concurrency import run_in_threadpool
 import os
 
 from app.chatbot import get_chatbot_response
@@ -68,7 +69,9 @@ async def chat(request: MessageRequest):
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
     
     history = Chat_memory.get_history(request.session_id)
-    bot_reply = get_chatbot_response(request.message, history)
+    # The Gemini SDK is synchronous. Run it outside the event loop so one
+    # slow model request cannot block health checks or other chat sessions.
+    bot_reply = await run_in_threadpool(get_chatbot_response, request.message, history)
 
     Chat_memory.add_message(request.session_id, role="user", content=request.message)
     Chat_memory.add_message(request.session_id, role="bot", content=bot_reply)

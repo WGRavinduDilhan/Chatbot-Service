@@ -5,6 +5,8 @@ import os
 import re
 from typing import List, Dict, Optional
 
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+
 # Try to import Gemini AI library, if not available, set a flag and print a warning message. This allows the chatbot to function without Gemini AI features while informing the user about the missing dependency.
 try:   
     import google.generativeai as genai
@@ -92,17 +94,18 @@ def check_rules(message: str):
 def get_gemini_response(message: str, history: List[Dict]) -> str:
     
     api_key = os.getenv("GEMINI_API_KEY")
-    default_model = "gemini-3.8-flash"
-    model_name = os.getenv("GEMINI_MODEL", default_model)
+    model_name = os.getenv("GEMINI_MODEL", DEFAULT_GEMINI_MODEL).strip()
 
-    # Older deployments may still have the retired model in their environment.
+    # Older deployments may still have a retired model in their environment.
     if model_name in {
         "gemini-2.0-flash",
         "models/gemini-2.0-flash",
         "gemini-2.5-flash",
         "models/gemini-2.5-flash",
+        "gemini-3.5-flash-lite",
+        "models/gemini-3.5-flash-lite",
     }:
-        model_name = default_model
+        model_name = DEFAULT_GEMINI_MODEL
 
     if not api_key:
         return (
@@ -125,9 +128,10 @@ def get_gemini_response(message: str, history: List[Dict]) -> str:
         model = genai.GenerativeModel(
             model_name=model_name,
             system_instruction=(
-                "You are a helpful, friendly, and concise AI assistant. "
-                "Keep responses clear and under 150 words unless the user asks for detail. "
-                "Use emojis occasionally to be friendly. "
+                "You are RADI, a helpful and accurate AI assistant. "
+                "Answer the user's question directly with complete sentences. "
+                "Keep normal answers under 150 words, but never cut a sentence short. "
+                "Use short paragraphs or bullets when they improve clarity. "
                 "If you don't know something, say so honestly."
             )
         )
@@ -145,13 +149,16 @@ def get_gemini_response(message: str, history: List[Dict]) -> str:
         response = chat.send_message(
             message,
             generation_config={
-                "max_output_tokens": 300,
-                "temperature": 0.7,
+                "max_output_tokens": 512,
+                "temperature": 0.4,
             }
         )
 
         # Step 5: Return the response text
-        return response.text
+        response_text = response.text
+        if not response_text:
+            return "I couldn't generate a response for that question. Please try again."
+        return response_text.strip()
 
 
     except Exception as e:
@@ -181,4 +188,3 @@ def get_chatbot_response(message: str, history: List[Dict]) -> str:
     # If no any rules matched, get a response from Gemini AI
     gemini_response = get_gemini_response(message, history)
     return gemini_response
-
